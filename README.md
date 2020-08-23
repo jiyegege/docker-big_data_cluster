@@ -1,10 +1,8 @@
-[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/big-data-europe/Lobby)
+# docker-big_data_cluster
 
-# Changes
+This is a docker big data cluster container, including Hadoop, Hive. it is based on the [big-data-europe/docker-hadoop](https://github.com/big-data-europe/docker-hadoop) project, and is built using the relevant big data docker images from [big-data-europe](https://github.com/big-data-europe?type=source). Many thanks to big-data-europe for providing support for these images.
 
-Version 2.0.0 introduces uses wait_for_it script for the cluster startup
-
-# Hadoop Docker
+# Hadoop
 
 ## Supported Hadoop Versions
 See repository branches for supported hadoop versions
@@ -12,17 +10,17 @@ See repository branches for supported hadoop versions
 ## Quick Start
 
 To deploy an example HDFS cluster, run:
-```
+```shell
   docker-compose up
 ```
 
 Run example wordcount job:
-```
+```shell
   make wordcount
 ```
 
 Or deploy in swarm:
-```
+```shell
 docker stack deploy -c docker-compose-v3.yml hadoop
 ```
 
@@ -39,16 +37,16 @@ Run `docker network inspect` on the network (e.g. `dockerhadoop_default`) to fin
 ## Configure Environment Variables
 
 The configuration parameters can be specified in the hadoop.env file or as environmental variables for specific services (e.g. namenode, datanode etc.):
-```
+```xml
   CORE_CONF_fs_defaultFS=hdfs://namenode:8020
 ```
 
 CORE_CONF corresponds to core-site.xml. fs_defaultFS=hdfs://namenode:8020 will be transformed into:
-```
+```xml
   <property><name>fs.defaultFS</name><value>hdfs://namenode:8020</value></property>
 ```
 To define dash inside a configuration parameter, use triple underscore, such as YARN_CONF_yarn_log___aggregation___enable=true (yarn-site.xml):
-```
+```xml
   <property><name>yarn.log-aggregation-enable</name><value>true</value></property>
 ```
 
@@ -61,3 +59,15 @@ The available configurations are:
 * /etc/hadoop/mapred-site.xml  MAPRED_CONF
 
 If you need to extend some other configuration file, refer to base/entrypoint.sh bash script.
+
+# Hive
+
+Load data into Hive:
+
+```shell
+$ docker-compose exec hive-server bash
+  # /opt/hive/bin/beeline -u jdbc:hive2://localhost:10000
+  > CREATE TABLE pokes (foo INT, bar STRING);
+  > LOAD DATA LOCAL INPATH '/opt/hive/examples/files/kv1.txt' OVERWRITE INTO TABLE pokes;
+```
+
